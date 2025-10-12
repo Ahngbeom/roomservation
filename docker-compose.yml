@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: roomservation-postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_DATABASE:-roomservation}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - roomservation-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: roomservation-redis
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - roomservation-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: roomservation-api
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-3000}
+      - DB_TYPE=${DB_TYPE:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_DATABASE=${DB_DATABASE:-roomservation}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_ACCESS_EXPIRES_IN=${JWT_ACCESS_EXPIRES_IN:-15m}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - RATE_LIMIT_TTL=${RATE_LIMIT_TTL:-60}
+      - RATE_LIMIT_MAX=${RATE_LIMIT_MAX:-100}
+    ports:
+      - '${PORT:-3000}:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - roomservation-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  roomservation-network:
+    driver: bridge
