@@ -1,0 +1,29 @@
+# Development Dockerfile for Frontend (Turborepo)
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+RUN apk add --no-cache dumb-init
+
+# Copy package files for monorepo
+COPY package*.json ./
+COPY turbo.json ./
+
+# Copy workspace package files
+COPY apps/user-web/package*.json ./apps/user-web/
+COPY apps/admin-web/package*.json ./apps/admin-web/
+COPY apps/kiosk-web/package*.json ./apps/kiosk-web/
+COPY packages/*/package*.json ./packages/
+
+# Install all dependencies
+RUN npm install
+
+# Copy all source code
+COPY . .
+
+# Expose ports for all apps
+EXPOSE 5173 5174 5175
+
+# Run all apps in development mode
+CMD ["dumb-init", "npm", "run", "dev"]

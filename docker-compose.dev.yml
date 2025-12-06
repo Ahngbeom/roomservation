@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: roomservation-dev-postgres
+    profiles: ['infra', 'all']
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
+      POSTGRES_DB: ${DB_DATABASE:-roomservation}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - roomservation-dev-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: roomservation-dev-redis
+    profiles: ['infra', 'all']
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_dev_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - roomservation-dev-network
+
+  # Backend API (Development)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: roomservation-dev-api
+    profiles: ['backend', 'all']
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_TYPE=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-admin}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_DATABASE=${DB_DATABASE:-roomservation}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-dev_access_secret_key_change_this}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-dev_refresh_secret_key_change_this}
+      - JWT_ACCESS_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - CORS_ORIGIN=http://localhost:5173,http://localhost:5174,http://localhost:5175
+      - RATE_LIMIT_TTL=60
+      - RATE_LIMIT_MAX=100
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./src:/app/src
+      - ./test:/app/test
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - roomservation-dev-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # User Web (Port 5173)
+  user-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: roomservation-dev-user-web
+    profiles: ['frontend', 'user-web', 'all']
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3000
+      - VITE_WS_URL=ws://localhost:3000
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: ['dumb-init', 'npm', 'run', 'dev:user']
+    depends_on:
+      - api
+    networks:
+      - roomservation-dev-network
+
+  # Admin Web (Port 5174)
+  admin-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: roomservation-dev-admin-web
+    profiles: ['frontend', 'admin-web', 'all']
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3000
+      - VITE_WS_URL=ws://localhost:3000
+    ports:
+      - '5174:5174'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: ['dumb-init', 'npm', 'run', 'dev:admin']
+    depends_on:
+      - api
+    networks:
+      - roomservation-dev-network
+
+  # Kiosk Web (Port 5175)
+  kiosk-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: roomservation-dev-kiosk-web
+    profiles: ['frontend', 'kiosk-web', 'all']
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3000
+      - VITE_WS_URL=ws://localhost:3000
+    ports:
+      - '5175:5175'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: ['dumb-init', 'npm', 'run', 'dev:kiosk']
+    depends_on:
+      - api
+    networks:
+      - roomservation-dev-network
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  roomservation-dev-network:
+    driver: bridge

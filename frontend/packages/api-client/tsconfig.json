@@ -1,0 +1,9 @@
+{
+  "extends": "../shared-types/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM"],
+    "composite": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

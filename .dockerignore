@@ -50,3 +50,6 @@ Thumbs.db
 .editorconfig
 .prettierrc
 eslint.config.mjs
+
+# Frontend (separate build)
+frontend

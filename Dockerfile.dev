@@ -1,0 +1,22 @@
+# Development Dockerfile for Backend API
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies for development
+RUN apk add --no-cache dumb-init
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose the application port
+EXPOSE 3000
+
+# Run in development mode with hot reload
+CMD ["dumb-init", "npm", "run", "start:dev"]

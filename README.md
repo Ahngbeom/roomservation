@@ -21,6 +21,7 @@
 - [설치 및 실행](#설치-및-실행)
 - [테스트](#테스트)
 - [개발 및 배포](#개발-및-배포)
+- [프론트엔드](#프론트엔드)
 - [향후 확장 계획](#향후-확장-계획)
 
 ---
@@ -57,6 +58,8 @@
 ## 프로젝트 현황
 
 ### ✅ 완료된 작업
+
+**백엔드**
 - [x] 모든 Entity 정의 (User, Room, Reservation, RoomAccess)
 - [x] 핵심 비즈니스 로직 구현 (Auth, Users, Rooms, Reservations, Access)
 - [x] 관리자 API (사용자 관리, 예약 조회, 통계, 역할 변경)
@@ -70,6 +73,15 @@
 - [x] ESLint 설정 최적화 및 코드 품질 개선
 - [x] Docker 프로덕션 환경 설정 (Multi-stage build, docker-compose)
 - [x] **프로덕션 배포 준비 완료 🚀**
+
+**프론트엔드** (2025-11-22)
+- [x] Turborepo Monorepo 구조 설정
+- [x] 공통 패키지 (shared-types, api-client, ui-components, utils)
+- [x] 사용자 웹앱 (user-web) 기본 구조 및 인증
+- [x] 관리자 대시보드 (admin-web) 기본 구조
+- [x] 키오스크 앱 (kiosk-web) 기본 구조
+- [x] React Router, TanStack Query, Zustand 설정
+- [x] Tailwind CSS + shadcn/ui 준비
 
 ### 🔄 진행 중
 - [ ] Rate Limiting
@@ -506,20 +518,83 @@ RATE_LIMIT_MAX=100
 
 ## 설치 및 실행
 
-### 로컬 개발 환경 설정
+### Docker 개발 환경 설정 (권장) 🐳
+
+**필요한 서비스만 선택적으로 실행:**
 
 ```bash
-# 의존성 설치
+# 인프라만 실행 (PostgreSQL + Redis)
+npm run docker:infra
+
+# 백엔드 개발 (인프라 + API)
+npm run docker:backend
+
+# 프론트엔드 전체 (인프라 + 백엔드 + 3개 프론트)
+npm run docker:frontend
+
+# 특정 앱만 실행
+npm run docker:user    # 사용자 웹
+npm run docker:admin   # 관리자 대시보드
+npm run docker:kiosk   # 키오스크
+
+# 전체 실행 (모든 서비스)
+npm run docker:dev:build
+```
+
+**서비스 접속:**
+- 백엔드 API: http://localhost:3000
+- Swagger 문서: http://localhost:3000/api-docs
+- 사용자 웹: http://localhost:5173
+- 관리자 대시보드: http://localhost:5174
+- 키오스크: http://localhost:5175
+
+**유용한 명령어:**
+```bash
+# 로그 확인
+npm run docker:dev:logs
+
+# 서비스 종료
+npm run docker:dev:down
+
+# 완전 초기화 (DB 포함)
+npm run docker:dev:clean
+```
+
+**개발 시나리오별 추천:**
+- 백엔드 개발: `npm run docker:infra` + 로컬에서 `npm run start:dev`
+- 프론트 개발: `npm run docker:backend` + 로컬에서 `npm run frontend:dev`
+- 통합 테스트: `npm run docker:dev:build`
+
+**자세한 가이드**: [README.DOCKER.DEV.md](README.DOCKER.DEV.md)
+
+---
+
+### 로컬 개발 환경 설정 (수동)
+
+**백엔드 + 프론트엔드를 로컬에서 직접 실행:**
+
+```bash
+# 1. PostgreSQL, Redis 실행 (Docker)
+docker-compose up -d postgres redis
+
+# 2. 백엔드 의존성 설치
 npm install
 
-# 환경 변수 설정
+# 3. 프론트엔드 의존성 설치
+npm run frontend:install
+
+# 4. 환경 변수 설정
 cp .env.example .env
 
-# 데이터베이스 마이그레이션
-npm run migration:run
+# 5. 백엔드 + 프론트엔드 동시 실행
+npm run dev:all
 
-# 개발 서버 실행 (hot-reload)
+# 또는 별도 터미널에서 각각 실행
+# 터미널 1: 백엔드
 npm run start:dev
+
+# 터미널 2: 프론트엔드
+npm run frontend:dev
 ```
 
 ### 다른 실행 모드
@@ -530,6 +605,9 @@ npm run start
 
 # 프로덕션 모드
 npm run start:prod
+
+# Docker 프로덕션 배포
+npm run docker:prod:build
 ```
 
 ### 데이터베이스 설정
@@ -654,6 +732,93 @@ docker compose --env-file .env.production up -d --build
 # 로그 확인
 docker compose logs -f api
 ```
+
+### ipTIME DDNS 배포 (자택/사무실 서버)
+
+ipTIME 공유기의 DDNS를 활용한 자택 서버 배포 가이드는 [README.IPTIME_DEPLOY.md](README.IPTIME_DEPLOY.md)를 참고하세요.
+
+**포함 내용:**
+- ipTIME DDNS 설정 및 포트포워딩
+- Nginx Reverse Proxy + Let's Encrypt SSL
+- 보안 설정 (방화벽, Fail2Ban)
+- 데이터베이스 백업 및 모니터링
+- 완전한 트러블슈팅 가이드
+
+---
+
+## 프론트엔드
+
+방 예약 서비스의 프론트엔드는 **Turborepo 기반 Monorepo**로 구성되어 있습니다.
+
+### 📁 프로젝트 구조
+
+```
+frontend/
+├── apps/
+│   ├── user-web/          # 사용자용 웹 (포트: 3000)
+│   ├── admin-web/         # 관리자 대시보드 (포트: 3001)
+│   └── kiosk-web/         # 키오스크 앱 (포트: 3002)
+└── packages/
+    ├── shared-types/      # 공통 타입 정의
+    ├── api-client/        # API 통신 클라이언트
+    ├── ui-components/     # 공통 UI 컴포넌트
+    └── utils/             # 유틸리티 함수
+```
+
+### 🛠 기술 스택
+
+- **Monorepo**: Turborepo
+- **Build Tool**: Vite 6
+- **Framework**: React 18 + TypeScript 5
+- **상태 관리**: Zustand (전역), TanStack Query (서버)
+- **UI**: Tailwind CSS 3 + shadcn/ui
+- **통신**: Axios, Socket.io-client
+- **폼**: React Hook Form + Zod
+- **라우팅**: React Router v6
+
+### 🚀 빠른 시작
+
+```bash
+cd frontend
+
+# 의존성 설치
+npm install
+
+# 환경 변수 설정
+cp apps/user-web/.env.example apps/user-web/.env
+cp apps/admin-web/.env.example apps/admin-web/.env
+cp apps/kiosk-web/.env.example apps/kiosk-web/.env
+
+# 모든 앱 동시 실행
+npm run dev
+
+# 특정 앱만 실행
+npm run dev:user    # 사용자 웹 (localhost:3000)
+npm run dev:admin   # 관리자 대시보드 (localhost:3001)
+npm run dev:kiosk   # 키오스크 (localhost:3002)
+```
+
+### 📱 애플리케이션
+
+**User Web** - 사용자용 웹 애플리케이션
+- 로그인/회원가입
+- 방 검색 및 예약 신청
+- 예약 관리 및 QR 코드 생성
+- 실시간 알림
+
+**Admin Web** - 관리자 대시보드
+- 통계 대시보드
+- 사용자/방/예약 관리
+- 출입 기록 조회
+
+**Kiosk Web** - 입구 키오스크
+- QR 코드 스캔
+- PIN 입력
+- 출입 승인/거부
+
+### 📖 상세 가이드
+
+프론트엔드 개발 가이드는 [frontend/README.md](frontend/README.md)를 참고하세요.
 
 ---
 
