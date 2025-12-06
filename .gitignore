@@ -9,3 +9,10 @@ dist
 coverage
 .DS_Store
 .claude/settings.local.json
+
+# npm 아티팩트 (패키지 링크 파일)
+nest
+turbo
+roomservation@*
+roomservation-frontend@*
+*@[0-9]*.[0-9]*.[0-9]*

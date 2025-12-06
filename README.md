@@ -26,6 +26,62 @@
 
 ---
 
+## 📚 문서 네비게이션
+
+### 시작하기
+
+처음 프로젝트를 접하는 경우 다음 순서로 읽는 것을 권장합니다:
+
+1. **[README.md](README.md)** - 프로젝트 개요 및 전체 구조 (이 문서)
+2. **[README.DEVELOPMENT.md](README.DEVELOPMENT.md)** - 개발 환경 설정
+3. **[README.TESTING.md](README.TESTING.md)** - 테스트 실행 가이드
+
+### 배포 가이드
+
+- **[README.DEPLOYMENT.md](README.DEPLOYMENT.md)** - 프로덕션 배포 및 DDNS 설정
+
+### 작업 히스토리
+
+- **[CLAUDE.md](CLAUDE.md)** - 전체 작업 히스토리 및 체크리스트
+
+### 도메인별 상세 문서
+
+각 도메인의 상세 구현 사항은 다음 문서를 참고하세요:
+
+| 도메인 | 문서 | 설명 |
+|--------|------|------|
+| 인증/권한 | [CLAUDE.AUTH.md](CLAUDE.AUTH.md) | JWT 인증, 사용자 관리 |
+| 회의실 | [CLAUDE.ROOMS.md](CLAUDE.ROOMS.md) | 방 CRUD, 예약 가능 시간대 |
+| 예약 | [CLAUDE.RESERVATIONS.md](CLAUDE.RESERVATIONS.md) | 예약 생성/변경/취소, 충돌 검사 |
+| 출입 관리 | [CLAUDE.ACCESS.md](CLAUDE.ACCESS.md) | QR/PIN 토큰, 출입 기록 |
+| 관리자 | [CLAUDE.ADMIN.md](CLAUDE.ADMIN.md) | 사용자 관리, 통계 |
+| 알림 | [CLAUDE.NOTIFICATIONS.md](CLAUDE.NOTIFICATIONS.md) | WebSocket 실시간 알림 |
+
+### 역할별 추천 읽기
+
+**백엔드 개발자**
+1. README.md (전체 구조)
+2. CLAUDE.md (작업 히스토리)
+3. 담당 도메인의 CLAUDE.*.md
+4. README.DEVELOPMENT.md (개발 환경)
+
+**프론트엔드 개발자**
+1. README.md (API 명세)
+2. frontend/README.md (프론트엔드 가이드)
+3. Swagger 문서 (http://localhost:3000/api-docs)
+
+**DevOps/인프라 담당자**
+1. README.DEPLOYMENT.md (배포 전체)
+2. README.DEVELOPMENT.md (개발 환경)
+3. README.TESTING.md (테스트)
+
+**프로젝트 관리자**
+1. README.md (전체 개요)
+2. CLAUDE.md (진행 상황)
+3. README.DEPLOYMENT.md (배포 현황)
+
+---
+
 ## 프로젝트 개요
 
 ### 목적
@@ -178,6 +234,156 @@
 │  PostgreSQL │  │  Redis   │
 └─────────────┘  └──────────┘
 ```
+
+### 아키텍처 및 도메인 관계
+
+#### 도메인 개요
+
+이 프로젝트는 6개의 주요 도메인으로 구성되어 있으며, 각 도메인은 명확한 책임을 가집니다.
+
+#### 도메인 관계 다이어그램
+
+```
+┌─────────────────────────────────────────────────────┐
+│                      🔐 Auth                        │
+│              (전체 도메인의 보안 계층)                 │
+│   - JWT 인증                                         │
+│   - 역할 기반 접근 제어 (RBAC)                        │
+│   - 사용자 인증/인가                                  │
+└────────────────┬────────────────────────────────────┘
+                 │ (모든 도메인에 인증 제공)
+                 │
+    ┌────────────┴────────────┬─────────────┬──────────┐
+    │                         │             │          │
+┌───▼────┐  ┌────────────────▼──┐  ┌───────▼──┐  ┌───▼────┐
+│ 🏢     │  │ 📅               │  │ 🔑      │  │ 👨‍💼    │
+│ Rooms  │◄─┤ Reservations     │◄─┤ Access  │  │ Admin  │
+│        │  │                  │  │         │  │        │
+│ 방 관리 │  │ 예약 관리         │  │ 출입    │  │ 관리자  │
+└────────┘  └──────────────────┘  └─────────┘  └────────┘
+    │              │                    │            │
+    └──────────────┴────────────────────┴────────────┘
+                           │
+                  ┌────────▼────────┐
+                  │ 🔔              │
+                  │ Notifications   │
+                  │                 │
+                  │ 실시간 알림       │
+                  └─────────────────┘
+```
+
+#### 도메인 간 관계 상세
+
+**1. Auth → 모든 도메인**
+- **관계**: 보안 계층 제공
+- **역할**: JWT 인증, 역할 기반 접근 제어
+- **흐름**: 모든 API 요청은 Auth를 통한 인증 필요
+
+**2. Rooms ↔ Reservations**
+- **관계**: 예약 대상 제공 (1:N)
+- **역할**:
+  - Rooms: 예약 가능한 공간 정보 제공
+  - Reservations: 특정 방에 대한 예약 생성
+- **제약**: 방의 최대 수용 인원, 시설 정보로 예약 필터링
+
+**3. Reservations → Access**
+- **관계**: 출입 권한 근거 제공 (1:N)
+- **역할**:
+  - Reservations: 확정된 예약으로 출입 권한 근거 제공
+  - Access: 예약 기반 QR/PIN 토큰 생성
+- **제약**: CONFIRMED 상태 예약만 토큰 생성 가능
+
+**4. Rooms ↔ Access**
+- **관계**: 출입 대상 매핑 (1:N)
+- **역할**:
+  - Rooms: 물리적 공간 정보
+  - Access: 특정 방에 대한 출입 토큰 및 기록
+- **제약**: 출입 토큰은 특정 방에만 유효
+
+**5. Admin → 모든 도메인**
+- **관계**: 관리 및 통계
+- **역할**:
+  - 전체 사용자, 방, 예약 데이터 조회
+  - 시스템 통계 제공
+  - 사용자 역할 변경
+- **제약**: 관리자 권한 필수
+
+**6. Notifications ← 모든 도메인**
+- **관계**: 이벤트 구독 및 알림 발송
+- **역할**:
+  - 예약 생성/변경/취소 알림
+  - 예약 시작 10분 전 알림
+  - 관리자 승인/거부 알림
+- **제약**: WebSocket 연결 시 JWT 인증 필요
+
+#### 데이터 흐름 예시: 전체 예약 프로세스
+
+```
+1. [사용자 로그인] → Auth 인증 → JWT 발급
+   ↓
+2. [방 검색] → Rooms 도메인 조회 (인증 필요)
+   ↓
+3. [예약 생성] → Reservations 도메인
+   - 예약 시간 충돌 검사
+   - 방 수용 인원 검증
+   - 초기 상태: PENDING
+   ↓
+4. [예약 확정] → 관리자 승인 (Admin)
+   - 상태 변경: PENDING → CONFIRMED
+   - Notifications: 사용자에게 알림
+   ↓
+5. [입장 토큰 생성] → Access 도메인
+   - 예약 시작 10분 전부터 생성 가능
+   - QR 코드 또는 PIN 발급
+   - Notifications: 입장 안내 알림
+   ↓
+6. [토큰 검증 및 입장] → Access 도메인
+   - 토큰 유효성 검증
+   - 출입 기록 생성
+   - 예약 상태: IN_PROGRESS
+   ↓
+7. [자동 완료 처리] → Reservations (Cron)
+   - 예약 종료 시간 경과 시
+   - 입장 기록 있음: COMPLETED
+   - 입장 기록 없음: NO_SHOW
+```
+
+#### 보안 계층 구조
+
+```
+┌─────────────────────────────────────────┐
+│          Public (인증 불필요)             │
+│  - 회원가입 (POST /api/auth/register)   │
+│  - 로그인 (POST /api/auth/login)         │
+└─────────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────┐
+│       Authenticated (JWT 필요)          │
+│  - 방 조회, 예약 생성/조회               │
+│  - 본인 프로필 조회/수정                 │
+│  - 본인 예약 관리                        │
+│  - 출입 토큰 생성 (본인 예약만)           │
+└─────────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────┐
+│         Admin (관리자 권한 필요)         │
+│  - 방 생성/수정/삭제                     │
+│  - 전체 사용자/예약 조회                 │
+│  - 사용자 역할 변경                      │
+│  - 시스템 통계 조회                      │
+└─────────────────────────────────────────┘
+```
+
+#### 도메인별 상세 문서
+
+각 도메인의 구체적인 구현 사항은 해당 문서를 참고하세요:
+
+- **[CLAUDE.AUTH.md](CLAUDE.AUTH.md)** - 인증/권한 상세
+- **[CLAUDE.ROOMS.md](CLAUDE.ROOMS.md)** - 방 관리 상세
+- **[CLAUDE.RESERVATIONS.md](CLAUDE.RESERVATIONS.md)** - 예약 관리 상세
+- **[CLAUDE.ACCESS.md](CLAUDE.ACCESS.md)** - 출입 관리 상세
+- **[CLAUDE.ADMIN.md](CLAUDE.ADMIN.md)** - 관리자 기능 상세
+- **[CLAUDE.NOTIFICATIONS.md](CLAUDE.NOTIFICATIONS.md)** - 알림 시스템 상세
 
 ---
 
@@ -565,7 +771,7 @@ npm run docker:dev:clean
 - 프론트 개발: `npm run docker:backend` + 로컬에서 `npm run frontend:dev`
 - 통합 테스트: `npm run docker:dev:build`
 
-**자세한 가이드**: [README.DOCKER.DEV.md](README.DOCKER.DEV.md)
+**자세한 가이드**: [README.DEVELOPMENT.md](README.DEVELOPMENT.md)
 
 ---
 
@@ -612,7 +818,7 @@ npm run docker:prod:build
 
 ### 데이터베이스 설정
 
-데이터베이스 설정에 대한 자세한 내용은 [README.DATABASE.md](README.DATABASE.md)를 참고하세요.
+데이터베이스 설정에 대한 자세한 내용은 [README.DEVELOPMENT.md](README.DEVELOPMENT.md)를 참고하세요.
 
 ---
 
@@ -716,7 +922,7 @@ src/
 
 ### Docker 프로덕션 배포
 
-Docker를 사용한 프로덕션 배포 가이드는 [README.DOCKER.md](README.DOCKER.md)를 참고하세요.
+Docker를 사용한 프로덕션 배포 가이드는 [README.DEPLOYMENT.md](README.DEPLOYMENT.md)를 참고하세요.
 
 **주요 특징:**
 - Multi-stage build로 최적화된 이미지 크기
@@ -735,7 +941,7 @@ docker compose logs -f api
 
 ### ipTIME DDNS 배포 (자택/사무실 서버)
 
-ipTIME 공유기의 DDNS를 활용한 자택 서버 배포 가이드는 [README.IPTIME_DEPLOY.md](README.IPTIME_DEPLOY.md)를 참고하세요.
+ipTIME 공유기의 DDNS를 활용한 자택 서버 배포 가이드는 [README.DEPLOYMENT.md](README.DEPLOYMENT.md)를 참고하세요.
 
 **포함 내용:**
 - ipTIME DDNS 설정 및 포트포워딩
