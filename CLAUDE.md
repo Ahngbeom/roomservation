@@ -286,7 +286,7 @@ Time:        104.463 s
 5. **.gitignore 업데이트**
    - `.env.production` 제외 (보안)
 
-6. **Docker 사용 가이드 작성 (README.DOCKER.md)**
+6. **Docker 사용 가이드 작성** (README.DOCKER.md → README.DEPLOYMENT.md로 통합됨)
    - 사전 요구사항 및 환경 설정
    - 빌드 및 실행 방법
    - 컨테이너 관리 명령어

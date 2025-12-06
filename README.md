@@ -771,7 +771,7 @@ npm run docker:dev:clean
 - 프론트 개발: `npm run docker:backend` + 로컬에서 `npm run frontend:dev`
 - 통합 테스트: `npm run docker:dev:build`
 
-**자세한 가이드**: [README.DOCKER.DEV.md](README.DOCKER.DEV.md)
+**자세한 가이드**: [README.DEVELOPMENT.md](README.DEVELOPMENT.md)
 
 ---
 
@@ -818,7 +818,7 @@ npm run docker:prod:build
 
 ### 데이터베이스 설정
 
-데이터베이스 설정에 대한 자세한 내용은 [README.DATABASE.md](README.DATABASE.md)를 참고하세요.
+데이터베이스 설정에 대한 자세한 내용은 [README.DEVELOPMENT.md](README.DEVELOPMENT.md)를 참고하세요.
 
 ---
 
@@ -922,7 +922,7 @@ src/
 
 ### Docker 프로덕션 배포
 
-Docker를 사용한 프로덕션 배포 가이드는 [README.DOCKER.md](README.DOCKER.md)를 참고하세요.
+Docker를 사용한 프로덕션 배포 가이드는 [README.DEPLOYMENT.md](README.DEPLOYMENT.md)를 참고하세요.
 
 **주요 특징:**
 - Multi-stage build로 최적화된 이미지 크기
@@ -941,7 +941,7 @@ docker compose logs -f api
 
 ### ipTIME DDNS 배포 (자택/사무실 서버)
 
-ipTIME 공유기의 DDNS를 활용한 자택 서버 배포 가이드는 [README.IPTIME_DEPLOY.md](README.IPTIME_DEPLOY.md)를 참고하세요.
+ipTIME 공유기의 DDNS를 활용한 자택 서버 배포 가이드는 [README.DEPLOYMENT.md](README.DEPLOYMENT.md)를 참고하세요.
 
 **포함 내용:**
 - ipTIME DDNS 설정 및 포트포워딩
