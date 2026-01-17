@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { ReservationsService } from './reservations.service';
 import { Reservation, ReservationStatus } from './reservation.entity';
+import { RoomAccess } from '../access/room-access.entity';
 import { RoomsService } from '../rooms/rooms.service';
 import {
   NotFoundException,
@@ -74,6 +75,28 @@ describe('ReservationsService', () => {
     createQueryBuilder: jest.fn(() => mockQueryBuilder),
   };
 
+  const mockRoomAccessRepository = {
+    update: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  const mockTransactionQueryBuilder = {
+    setLock: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    getOne: jest.fn().mockResolvedValue(null),
+  };
+
+  const mockDataSource = {
+    transaction: jest.fn((callback) =>
+      callback({
+        create: jest.fn().mockImplementation((_, data) => data),
+        save: jest.fn().mockImplementation((data) => Promise.resolve({ id: 'new-id', ...data })),
+        createQueryBuilder: jest.fn(() => mockTransactionQueryBuilder),
+      }),
+    ),
+  };
+
   const mockRoomsService = {
     findOne: jest.fn(),
   };
@@ -85,6 +108,14 @@ describe('ReservationsService', () => {
         {
           provide: getRepositoryToken(Reservation),
           useValue: mockRepository,
+        },
+        {
+          provide: getRepositoryToken(RoomAccess),
+          useValue: mockRoomAccessRepository,
+        },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
         },
         {
           provide: RoomsService,
@@ -118,15 +149,14 @@ describe('ReservationsService', () => {
       };
 
       mockRoomsService.findOne.mockResolvedValue(mockRoom);
-      mockQueryBuilder.getOne.mockResolvedValue(null); // No conflict
-      mockRepository.create.mockReturnValue(mockReservation);
-      mockRepository.save.mockResolvedValue(mockReservation);
+      mockTransactionQueryBuilder.getOne.mockResolvedValue(null); // No conflict
 
       const result = await service.create(createDto, 'user-id');
 
-      expect(result).toEqual(mockReservation);
+      expect(result).toBeDefined();
+      expect(result.roomId).toBe('room-id');
+      expect(result.status).toBe(ReservationStatus.PENDING);
       expect(mockRoomsService.findOne).toHaveBeenCalledWith('room-id');
-      expect(mockRepository.save).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if start time is in the past', async () => {
@@ -191,7 +221,7 @@ describe('ReservationsService', () => {
       };
 
       mockRoomsService.findOne.mockResolvedValue(mockRoom);
-      mockQueryBuilder.getOne.mockResolvedValue(mockReservation); // Conflict exists
+      mockTransactionQueryBuilder.getOne.mockResolvedValue(mockReservation); // Conflict exists
 
       await expect(service.create(createDto, 'user-id')).rejects.toThrow(ConflictException);
     });

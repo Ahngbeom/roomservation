@@ -6,8 +6,9 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, EntityManager } from 'typeorm';
 import { Reservation, ReservationStatus } from './reservation.entity';
+import { RoomAccess } from '../access/room-access.entity';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { CancelReservationDto } from './dto/cancel-reservation.dto';
@@ -18,7 +19,10 @@ export class ReservationsService {
   constructor(
     @InjectRepository(Reservation)
     private readonly reservationRepository: Repository<Reservation>,
+    @InjectRepository(RoomAccess)
+    private readonly roomAccessRepository: Repository<RoomAccess>,
     private readonly roomsService: RoomsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createReservationDto: CreateReservationDto, userId: string): Promise<Reservation> {
@@ -62,19 +66,22 @@ export class ReservationsService {
     // 6. 예약 시간이 방의 운영 시간 내에 있는지 확인
     this.validateOperatingHours(start, end, room.operatingHours);
 
-    // 7. 예약 충돌 검사
-    await this.checkReservationConflict(roomId, start, end);
+    // 7. 트랜잭션 + 비관적 락으로 예약 충돌 방지 및 생성
+    return await this.dataSource.transaction(async (manager) => {
+      // 비관적 락으로 충돌 검사
+      await this.checkReservationConflictWithLock(manager, roomId, start, end);
 
-    // 예약 생성
-    const reservation = this.reservationRepository.create({
-      ...createReservationDto,
-      userId,
-      startTime: start,
-      endTime: end,
-      status: ReservationStatus.PENDING,
+      // 예약 생성
+      const reservation = manager.create(Reservation, {
+        ...createReservationDto,
+        userId,
+        startTime: start,
+        endTime: end,
+        status: ReservationStatus.PENDING,
+      });
+
+      return await manager.save(reservation);
     });
-
-    return await this.reservationRepository.save(reservation);
   }
 
   async findAll(userId: string): Promise<Reservation[]> {
@@ -213,6 +220,9 @@ export class ReservationsService {
     reservation.status = ReservationStatus.CANCELLED;
     reservation.cancellationReason = cancelDto.cancellationReason;
 
+    // 예약 취소 시 관련 토큰 모두 무효화
+    await this.roomAccessRepository.update({ reservationId: id, isUsed: false }, { isUsed: true });
+
     return await this.reservationRepository.save(reservation);
   }
 
@@ -276,6 +286,42 @@ export class ReservationsService {
   ): Promise<void> {
     const queryBuilder = this.reservationRepository
       .createQueryBuilder('reservation')
+      .where('reservation.roomId = :roomId', { roomId })
+      .andWhere('reservation.status IN (:...statuses)', {
+        statuses: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED],
+      })
+      .andWhere('(reservation.startTime < :endTime AND reservation.endTime > :startTime)', {
+        startTime,
+        endTime,
+      });
+
+    if (excludeReservationId) {
+      queryBuilder.andWhere('reservation.id != :excludeReservationId', {
+        excludeReservationId,
+      });
+    }
+
+    const conflictingReservation = await queryBuilder.getOne();
+
+    if (conflictingReservation) {
+      throw new ConflictException('The selected time slot conflicts with an existing reservation');
+    }
+  }
+
+  /**
+   * 비관적 락을 사용한 예약 충돌 검사
+   * 트랜잭션 내에서 동시 예약 생성 시 race condition 방지
+   */
+  private async checkReservationConflictWithLock(
+    manager: EntityManager,
+    roomId: string,
+    startTime: Date,
+    endTime: Date,
+    excludeReservationId?: string,
+  ): Promise<void> {
+    const queryBuilder = manager
+      .createQueryBuilder(Reservation, 'reservation')
+      .setLock('pessimistic_write')
       .where('reservation.roomId = :roomId', { roomId })
       .andWhere('reservation.status IN (:...statuses)', {
         statuses: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED],
