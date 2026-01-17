@@ -21,10 +21,7 @@ export class ReservationsService {
     private readonly roomsService: RoomsService,
   ) {}
 
-  async create(
-    createReservationDto: CreateReservationDto,
-    userId: string,
-  ): Promise<Reservation> {
+  async create(createReservationDto: CreateReservationDto, userId: string): Promise<Reservation> {
     const { roomId, startTime, endTime, attendees } = createReservationDto;
 
     // 방 존재 여부 확인
@@ -36,9 +33,7 @@ export class ReservationsService {
 
     // 1. 예약 시작 시간이 현재 시간 이후인지 확인
     if (start <= now) {
-      throw new BadRequestException(
-        'Reservation start time must be in the future',
-      );
+      throw new BadRequestException('Reservation start time must be in the future');
     }
 
     // 2. 시작 시간이 종료 시간보다 이전인지 확인
@@ -49,9 +44,7 @@ export class ReservationsService {
     // 3. 최소 예약 시간: 30분
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
     if (durationMinutes < 30) {
-      throw new BadRequestException(
-        'Minimum reservation duration is 30 minutes',
-      );
+      throw new BadRequestException('Minimum reservation duration is 30 minutes');
     }
 
     // 4. 최대 예약 시간: 8시간
@@ -104,9 +97,7 @@ export class ReservationsService {
 
     // 사용자는 자신의 예약만 조회 가능
     if (reservation.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to view this reservation',
-      );
+      throw new ForbiddenException('You do not have permission to view this reservation');
     }
 
     return reservation;
@@ -147,9 +138,7 @@ export class ReservationsService {
     oneHourBeforeStart.setHours(oneHourBeforeStart.getHours() - 1);
 
     if (new Date() > oneHourBeforeStart) {
-      throw new BadRequestException(
-        'Cannot update reservation within 1 hour of start time',
-      );
+      throw new BadRequestException('Cannot update reservation within 1 hour of start time');
     }
 
     // 시간 변경 시 유효성 검사
@@ -168,8 +157,7 @@ export class ReservationsService {
         throw new BadRequestException('Start time must be before end time');
       }
 
-      const durationMinutes =
-        (newEnd.getTime() - newStart.getTime()) / (1000 * 60);
+      const durationMinutes = (newEnd.getTime() - newStart.getTime()) / (1000 * 60);
       if (durationMinutes < 30 || durationMinutes > 480) {
         throw new BadRequestException(
           'Reservation duration must be between 30 minutes and 8 hours',
@@ -180,12 +168,7 @@ export class ReservationsService {
       this.validateOperatingHours(newStart, newEnd, room.operatingHours);
 
       // 충돌 검사 (자신의 예약 제외)
-      await this.checkReservationConflict(
-        reservation.roomId,
-        newStart,
-        newEnd,
-        id,
-      );
+      await this.checkReservationConflict(reservation.roomId, newStart, newEnd, id);
 
       Object.assign(reservation, {
         startTime: newStart,
@@ -203,9 +186,7 @@ export class ReservationsService {
     if (updateReservationDto.attendees) {
       const room = await this.roomsService.findOne(reservation.roomId);
       if (updateReservationDto.attendees > room.capacity) {
-        throw new BadRequestException(
-          `Attendees count exceeds room capacity (${room.capacity})`,
-        );
+        throw new BadRequestException(`Attendees count exceeds room capacity (${room.capacity})`);
       }
       reservation.attendees = updateReservationDto.attendees;
     }
@@ -213,11 +194,7 @@ export class ReservationsService {
     return await this.reservationRepository.save(reservation);
   }
 
-  async cancel(
-    id: string,
-    cancelDto: CancelReservationDto,
-    userId: string,
-  ): Promise<Reservation> {
+  async cancel(id: string, cancelDto: CancelReservationDto, userId: string): Promise<Reservation> {
     const reservation = await this.findOne(id, userId);
 
     // 이미 취소되었는지 확인
@@ -227,14 +204,10 @@ export class ReservationsService {
 
     // 예약 시작 30분 전까지만 취소 가능
     const thirtyMinutesBeforeStart = new Date(reservation.startTime);
-    thirtyMinutesBeforeStart.setMinutes(
-      thirtyMinutesBeforeStart.getMinutes() - 30,
-    );
+    thirtyMinutesBeforeStart.setMinutes(thirtyMinutesBeforeStart.getMinutes() - 30);
 
     if (new Date() > thirtyMinutesBeforeStart) {
-      throw new BadRequestException(
-        'Cannot cancel reservation within 30 minutes of start time',
-      );
+      throw new BadRequestException('Cannot cancel reservation within 30 minutes of start time');
     }
 
     reservation.status = ReservationStatus.CANCELLED;
@@ -253,35 +226,25 @@ export class ReservationsService {
     }
 
     if (reservation.status !== ReservationStatus.PENDING) {
-      throw new BadRequestException(
-        'Only pending reservations can be confirmed',
-      );
+      throw new BadRequestException('Only pending reservations can be confirmed');
     }
 
     reservation.status = ReservationStatus.CONFIRMED;
     return await this.reservationRepository.save(reservation);
   }
 
-  private validateOperatingHours(
-    start: Date,
-    end: Date,
-    operatingHours: any,
-  ): void {
+  private validateOperatingHours(start: Date, end: Date, operatingHours: any): void {
     const startWeekday = start.getDay();
     const endWeekday = end.getDay();
 
     // 시작과 종료가 같은 날인지 확인
     if (startWeekday !== endWeekday) {
-      throw new BadRequestException(
-        'Reservation cannot span across multiple days',
-      );
+      throw new BadRequestException('Reservation cannot span across multiple days');
     }
 
     // 운영 요일인지 확인
     if (!operatingHours.weekdays.includes(startWeekday)) {
-      throw new BadRequestException(
-        'Room is not operating on the selected day',
-      );
+      throw new BadRequestException('Room is not operating on the selected day');
     }
 
     // 운영 시간 내인지 확인
@@ -290,22 +253,15 @@ export class ReservationsService {
     const endHour = end.getHours();
     const endMinute = end.getMinutes();
 
-    const [opStartHour, opStartMinute] = operatingHours.startTime
-      .split(':')
-      .map(Number);
-    const [opEndHour, opEndMinute] = operatingHours.endTime
-      .split(':')
-      .map(Number);
+    const [opStartHour, opStartMinute] = operatingHours.startTime.split(':').map(Number);
+    const [opEndHour, opEndMinute] = operatingHours.endTime.split(':').map(Number);
 
     const startTimeMinutes = startHour * 60 + startMinute;
     const endTimeMinutes = endHour * 60 + endMinute;
     const opStartTimeMinutes = opStartHour * 60 + opStartMinute;
     const opEndTimeMinutes = opEndHour * 60 + opEndMinute;
 
-    if (
-      startTimeMinutes < opStartTimeMinutes ||
-      endTimeMinutes > opEndTimeMinutes
-    ) {
+    if (startTimeMinutes < opStartTimeMinutes || endTimeMinutes > opEndTimeMinutes) {
       throw new BadRequestException(
         `Reservation time must be within operating hours (${operatingHours.startTime} - ${operatingHours.endTime})`,
       );
@@ -324,10 +280,10 @@ export class ReservationsService {
       .andWhere('reservation.status IN (:...statuses)', {
         statuses: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED],
       })
-      .andWhere(
-        '(reservation.startTime < :endTime AND reservation.endTime > :startTime)',
-        { startTime, endTime },
-      );
+      .andWhere('(reservation.startTime < :endTime AND reservation.endTime > :startTime)', {
+        startTime,
+        endTime,
+      });
 
     if (excludeReservationId) {
       queryBuilder.andWhere('reservation.id != :excludeReservationId', {
@@ -338,9 +294,7 @@ export class ReservationsService {
     const conflictingReservation = await queryBuilder.getOne();
 
     if (conflictingReservation) {
-      throw new ConflictException(
-        'The selected time slot conflicts with an existing reservation',
-      );
+      throw new ConflictException('The selected time slot conflicts with an existing reservation');
     }
   }
 }

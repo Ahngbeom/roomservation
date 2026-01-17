@@ -2,10 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
-import {
-  Reservation,
-  ReservationStatus,
-} from '../reservations/reservation.entity';
+import { Reservation, ReservationStatus } from '../reservations/reservation.entity';
 import { RoomAccess } from '../access/room-access.entity';
 
 @Injectable()
@@ -40,9 +37,7 @@ export class SchedulerService {
         },
       });
 
-      this.logger.log(
-        `Found ${potentialNoShows.length} potential no-show reservations`,
-      );
+      this.logger.log(`Found ${potentialNoShows.length} potential no-show reservations`);
 
       let noShowCount = 0;
 
@@ -57,8 +52,7 @@ export class SchedulerService {
         // 입장 기록이 없거나, accessTime이 null인 경우 (토큰만 생성하고 실제 사용하지 않음)
         if (!accessRecord || !accessRecord.accessTime) {
           reservation.status = ReservationStatus.NO_SHOW;
-          reservation.cancellationReason =
-            '예약 시간 내 입장하지 않음 (자동 처리)';
+          reservation.cancellationReason = '예약 시간 내 입장하지 않음 (자동 처리)';
           await this.reservationRepository.save(reservation);
           noShowCount++;
         }
@@ -89,18 +83,14 @@ export class SchedulerService {
         },
       });
 
-      this.logger.log(
-        `Found ${completedReservations.length} reservations to complete`,
-      );
+      this.logger.log(`Found ${completedReservations.length} reservations to complete`);
 
       for (const reservation of completedReservations) {
         reservation.status = ReservationStatus.COMPLETED;
         await this.reservationRepository.save(reservation);
       }
 
-      this.logger.log(
-        `Marked ${completedReservations.length} reservations as COMPLETED`,
-      );
+      this.logger.log(`Marked ${completedReservations.length} reservations as COMPLETED`);
     } catch (error) {
       this.logger.error('Error handling auto-completion', error);
     }

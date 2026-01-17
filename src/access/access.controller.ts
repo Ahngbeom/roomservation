@@ -8,13 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { AccessService } from './access.service';
 import { GenerateAccessTokenDto } from './dto/generate-access-token.dto';
 import { VerifyAccessTokenDto } from './dto/verify-access-token.dto';
@@ -43,10 +37,7 @@ export class AccessController {
     @Body() generateDto: GenerateAccessTokenDto,
     @CurrentUser('id') userId: string,
   ) {
-    const roomAccess = await this.accessService.generateAccessToken(
-      generateDto,
-      userId,
-    );
+    const roomAccess = await this.accessService.generateAccessToken(generateDto, userId);
 
     return {
       message: '입장 토큰이 생성되었습니다',

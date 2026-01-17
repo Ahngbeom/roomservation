@@ -83,9 +83,7 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findById('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findById('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -153,9 +151,9 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.update('invalid-id', { name: 'Updated' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update('invalid-id', { name: 'Updated' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

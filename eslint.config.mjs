@@ -30,6 +30,15 @@ export default tseslint.config(
       },
     },
   },
+  // test 폴더에 대한 별도 설정 (type-aware linting 비활성화)
+  {
+    files: ['test/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+  },
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',

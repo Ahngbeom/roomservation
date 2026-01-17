@@ -23,10 +23,7 @@ export class AccessService {
     const { reservationId, accessMethod } = generateDto;
 
     // 예약 정보 조회 및 권한 확인
-    const reservation = await this.reservationsService.findOne(
-      reservationId,
-      userId,
-    );
+    const reservation = await this.reservationsService.findOne(reservationId, userId);
 
     // 예약 상태 확인
     if (reservation.status === ReservationStatus.CANCELLED) {
@@ -38,25 +35,17 @@ export class AccessService {
     }
 
     if (reservation.status !== ReservationStatus.CONFIRMED) {
-      throw new BadRequestException(
-        '확정된 예약만 입장 토큰을 생성할 수 있습니다',
-      );
+      throw new BadRequestException('확정된 예약만 입장 토큰을 생성할 수 있습니다');
     }
 
     const now = new Date();
     const startTime = new Date(reservation.startTime);
-    const tenMinutesBeforeStart = new Date(
-      startTime.getTime() - 10 * 60 * 1000,
-    );
-    const thirtyMinutesAfterStart = new Date(
-      startTime.getTime() + 30 * 60 * 1000,
-    );
+    const tenMinutesBeforeStart = new Date(startTime.getTime() - 10 * 60 * 1000);
+    const thirtyMinutesAfterStart = new Date(startTime.getTime() + 30 * 60 * 1000);
 
     // 토큰 생성 가능 시간 확인 (예약 시작 10분 전 ~ 예약 시작 30분 후)
     if (now < tenMinutesBeforeStart) {
-      throw new BadRequestException(
-        '입장 토큰은 예약 시작 10분 전부터 생성할 수 있습니다',
-      );
+      throw new BadRequestException('입장 토큰은 예약 시작 10분 전부터 생성할 수 있습니다');
     }
 
     if (now > thirtyMinutesAfterStart) {

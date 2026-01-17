@@ -35,22 +35,18 @@ describe('Access (e2e)', () => {
 
     // Setup: Create user, get room, create reservation
     const userEmail = `access-test-${Date.now()}@example.com`;
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({
-        email: userEmail,
-        password: 'AccessTest123!',
-        name: 'Access Test User',
-        phone: '010-6666-6666',
-        department: 'Testing',
-      });
+    await request(app.getHttpServer()).post('/api/auth/register').send({
+      email: userEmail,
+      password: 'AccessTest123!',
+      name: 'Access Test User',
+      phone: '010-6666-6666',
+      department: 'Testing',
+    });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({
-        email: userEmail,
-        password: 'AccessTest123!',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+      email: userEmail,
+      password: 'AccessTest123!',
+    });
 
     userToken = loginResponse.body.accessToken;
 
@@ -158,22 +154,18 @@ describe('Access (e2e)', () => {
     it('should fail for another users reservation', async () => {
       // Create another user
       const anotherUserEmail = `another-access-${Date.now()}@example.com`;
-      await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          email: anotherUserEmail,
-          password: 'Pass123!',
-          name: 'Another Access User',
-          phone: '010-7777-7777',
-          department: 'Security',
-        });
+      await request(app.getHttpServer()).post('/api/auth/register').send({
+        email: anotherUserEmail,
+        password: 'Pass123!',
+        name: 'Another Access User',
+        phone: '010-7777-7777',
+        department: 'Security',
+      });
 
-      const anotherLoginResponse = await request(app.getHttpServer())
-        .post('/api/auth/login')
-        .send({
-          email: anotherUserEmail,
-          password: 'Pass123!',
-        });
+      const anotherLoginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+        email: anotherUserEmail,
+        password: 'Pass123!',
+      });
 
       const anotherUserToken = anotherLoginResponse.body.accessToken;
 
@@ -298,9 +290,7 @@ describe('Access (e2e)', () => {
 
     it('should fail without authentication', () => {
       if (roomId) {
-        return request(app.getHttpServer())
-          .get(`/api/access/room/${roomId}/current`)
-          .expect(401);
+        return request(app.getHttpServer()).get(`/api/access/room/${roomId}/current`).expect(401);
       }
     });
   });

@@ -4,11 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { User, UserRole } from '../users/user.entity';
-import {
-  UnauthorizedException,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
+import { UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -103,9 +99,7 @@ describe('AuthService', () => {
       const result = await service.register(registerDto);
 
       expect(result).toEqual(mockUser);
-      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
-        registerDto.email,
-      );
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(registerDto.email);
       expect(mockUsersService.create).toHaveBeenCalledWith(registerDto);
     });
 
@@ -119,9 +113,7 @@ describe('AuthService', () => {
 
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      await expect(service.register(registerDto)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
       expect(mockUsersService.create).not.toHaveBeenCalled();
     });
   });
@@ -149,9 +141,7 @@ describe('AuthService', () => {
       expect(result).toHaveProperty('accessToken', 'access-token');
       expect(result).toHaveProperty('refreshToken', 'refresh-token');
       expect(mockUsersService.findByEmail).toHaveBeenCalledWith(loginDto.email);
-      expect(userWithCompare.comparePassword).toHaveBeenCalledWith(
-        loginDto.password,
-      );
+      expect(userWithCompare.comparePassword).toHaveBeenCalledWith(loginDto.password);
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -162,9 +152,7 @@ describe('AuthService', () => {
 
       mockUsersService.findByEmail.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException if password is invalid', async () => {
@@ -180,12 +168,8 @@ describe('AuthService', () => {
 
       mockUsersService.findByEmail.mockResolvedValue(userWithCompare);
 
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      expect(userWithCompare.comparePassword).toHaveBeenCalledWith(
-        loginDto.password,
-      );
+      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      expect(userWithCompare.comparePassword).toHaveBeenCalledWith(loginDto.password);
     });
   });
 
@@ -216,10 +200,7 @@ describe('AuthService', () => {
       const result = await service.updateProfile('user-id', updateProfileDto);
 
       expect(result).toEqual(updatedUser);
-      expect(mockUsersService.update).toHaveBeenCalledWith(
-        'user-id',
-        updateProfileDto,
-      );
+      expect(mockUsersService.update).toHaveBeenCalledWith('user-id', updateProfileDto);
     });
   });
 
@@ -261,9 +242,9 @@ describe('AuthService', () => {
 
       mockUsersService.findById.mockResolvedValue(userWithCompare);
 
-      await expect(
-        service.changePassword('user-id', changePasswordDto),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.changePassword('user-id', changePasswordDto)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockUsersService.update).not.toHaveBeenCalled();
     });
   });

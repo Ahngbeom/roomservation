@@ -1,26 +1,9 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Body,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
+import { Controller, Get, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from './guards/admin.guard';
-import {
-  AdminUserQueryDto,
-  AdminReservationQueryDto,
-} from './dto/admin-query.dto';
+import { AdminUserQueryDto, AdminReservationQueryDto } from './dto/admin-query.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 @ApiTags('admin')
@@ -33,8 +16,7 @@ export class AdminController {
   @Get('users')
   @ApiOperation({
     summary: '모든 사용자 조회',
-    description:
-      '관리자가 모든 사용자 목록을 조회합니다. 페이지네이션과 역할 필터링을 지원합니다.',
+    description: '관리자가 모든 사용자 목록을 조회합니다. 페이지네이션과 역할 필터링을 지원합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -71,8 +53,7 @@ export class AdminController {
   @Get('reservations')
   @ApiOperation({
     summary: '모든 예약 조회',
-    description:
-      '관리자가 모든 예약 목록을 조회합니다. 다양한 필터와 페이지네이션을 지원합니다.',
+    description: '관리자가 모든 예약 목록을 조회합니다. 다양한 필터와 페이지네이션을 지원합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -205,10 +186,7 @@ export class AdminController {
     status: 404,
     description: '사용자를 찾을 수 없음',
   })
-  async updateUserRole(
-    @Param('id') id: string,
-    @Body() updateUserRoleDto: UpdateUserRoleDto,
-  ) {
+  async updateUserRole(@Param('id') id: string, @Body() updateUserRoleDto: UpdateUserRoleDto) {
     return this.adminService.updateUserRole(id, updateUserRoleDto);
   }
 }

@@ -31,7 +31,9 @@ import { CacheModule } from './cache/cache.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: ['development', 'test'].includes(configService.get<string>('NODE_ENV') || 'production'),
+        synchronize: ['development', 'test'].includes(
+          configService.get<string>('NODE_ENV') || 'production',
+        ),
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
     }),

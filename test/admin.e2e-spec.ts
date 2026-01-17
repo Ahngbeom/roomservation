@@ -34,43 +34,35 @@ describe('Admin (e2e)', () => {
 
     // Create admin user
     const adminEmail = `admin-e2e-${Date.now()}@example.com`;
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({
-        email: adminEmail,
-        password: 'AdminE2E123!',
-        name: 'Admin E2E User',
-        phone: '010-8888-8888',
-        department: 'Administration',
-      });
+    await request(app.getHttpServer()).post('/api/auth/register').send({
+      email: adminEmail,
+      password: 'AdminE2E123!',
+      name: 'Admin E2E User',
+      phone: '010-8888-8888',
+      department: 'Administration',
+    });
 
-    const adminLoginResponse = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({
-        email: adminEmail,
-        password: 'AdminE2E123!',
-      });
+    const adminLoginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+      email: adminEmail,
+      password: 'AdminE2E123!',
+    });
 
     adminToken = adminLoginResponse.body.accessToken;
 
     // Create regular user
     const userEmail = `user-e2e-${Date.now()}@example.com`;
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({
-        email: userEmail,
-        password: 'UserE2E123!',
-        name: 'User E2E',
-        phone: '010-9999-9999',
-        department: 'Testing',
-      });
+    await request(app.getHttpServer()).post('/api/auth/register').send({
+      email: userEmail,
+      password: 'UserE2E123!',
+      name: 'User E2E',
+      phone: '010-9999-9999',
+      department: 'Testing',
+    });
 
-    const userLoginResponse = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({
-        email: userEmail,
-        password: 'UserE2E123!',
-      });
+    const userLoginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+      email: userEmail,
+      password: 'UserE2E123!',
+    });
 
     userToken = userLoginResponse.body.accessToken;
     userId = userLoginResponse.body.user.id;
@@ -230,9 +222,7 @@ describe('Admin (e2e)', () => {
     });
 
     it('should fail without authentication', () => {
-      return request(app.getHttpServer())
-        .get('/api/admin/statistics')
-        .expect(401);
+      return request(app.getHttpServer()).get('/api/admin/statistics').expect(401);
     });
   });
 

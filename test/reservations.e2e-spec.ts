@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 describe('Reservations (e2e)', () => {
   let app: INestApplication;
   let userToken: string;
-  let userId: string;
+  let _userId: string;
   let roomId: string;
   let reservationId: string;
 
@@ -35,25 +35,21 @@ describe('Reservations (e2e)', () => {
 
     // Create and login user
     const userEmail = `reservation-test-${Date.now()}@example.com`;
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({
-        email: userEmail,
-        password: 'TestPass123!',
-        name: 'Reservation Test User',
-        phone: '010-3333-3333',
-        department: 'Engineering',
-      });
+    await request(app.getHttpServer()).post('/api/auth/register').send({
+      email: userEmail,
+      password: 'TestPass123!',
+      name: 'Reservation Test User',
+      phone: '010-3333-3333',
+      department: 'Engineering',
+    });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({
-        email: userEmail,
-        password: 'TestPass123!',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+      email: userEmail,
+      password: 'TestPass123!',
+    });
 
     userToken = loginResponse.body.accessToken;
-    userId = loginResponse.body.user.id;
+    _userId = loginResponse.body.user.id;
 
     // Get available rooms
     const roomsResponse = await request(app.getHttpServer())
@@ -251,9 +247,7 @@ describe('Reservations (e2e)', () => {
 
     it('should fail without authentication', () => {
       if (reservationId) {
-        return request(app.getHttpServer())
-          .get(`/api/reservations/${reservationId}`)
-          .expect(401);
+        return request(app.getHttpServer()).get(`/api/reservations/${reservationId}`).expect(401);
       }
     });
   });
@@ -304,22 +298,18 @@ describe('Reservations (e2e)', () => {
     it('should fail to update another users reservation', async () => {
       // Create another user
       const anotherUserEmail = `another-${Date.now()}@example.com`;
-      await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          email: anotherUserEmail,
-          password: 'Pass123!',
-          name: 'Another User',
-          phone: '010-4444-4444',
-          department: 'Sales',
-        });
+      await request(app.getHttpServer()).post('/api/auth/register').send({
+        email: anotherUserEmail,
+        password: 'Pass123!',
+        name: 'Another User',
+        phone: '010-4444-4444',
+        department: 'Sales',
+      });
 
-      const anotherLoginResponse = await request(app.getHttpServer())
-        .post('/api/auth/login')
-        .send({
-          email: anotherUserEmail,
-          password: 'Pass123!',
-        });
+      const anotherLoginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+        email: anotherUserEmail,
+        password: 'Pass123!',
+      });
 
       const anotherUserToken = anotherLoginResponse.body.accessToken;
 
@@ -347,9 +337,7 @@ describe('Reservations (e2e)', () => {
           .expect((res) => {
             if (res.status === 200) {
               expect(res.body.status).toBe('CANCELLED');
-              expect(res.body.cancellationReason).toBe(
-                'Meeting no longer needed',
-              );
+              expect(res.body.cancellationReason).toBe('Meeting no longer needed');
             }
             // Might fail if cancellation is too close to start time
           });
@@ -390,22 +378,18 @@ describe('Reservations (e2e)', () => {
     it('should fail to cancel another users reservation', async () => {
       // Use another user token from previous test or create new one
       const anotherUserEmail = `cancel-test-${Date.now()}@example.com`;
-      await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          email: anotherUserEmail,
-          password: 'Pass123!',
-          name: 'Cancel Test User',
-          phone: '010-5555-5555',
-          department: 'Marketing',
-        });
+      await request(app.getHttpServer()).post('/api/auth/register').send({
+        email: anotherUserEmail,
+        password: 'Pass123!',
+        name: 'Cancel Test User',
+        phone: '010-5555-5555',
+        department: 'Marketing',
+      });
 
-      const anotherLoginResponse = await request(app.getHttpServer())
-        .post('/api/auth/login')
-        .send({
-          email: anotherUserEmail,
-          password: 'Pass123!',
-        });
+      const anotherLoginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+        email: anotherUserEmail,
+        password: 'Pass123!',
+      });
 
       const anotherUserToken = anotherLoginResponse.body.accessToken;
 

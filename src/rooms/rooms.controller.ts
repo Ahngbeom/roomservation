@@ -11,13 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -54,8 +48,7 @@ export class RoomsController {
   @Get()
   @ApiOperation({
     summary: '방 목록 조회',
-    description:
-      '방 목록을 조회합니다. 수용인원, 시설, 위치로 필터링 가능합니다',
+    description: '방 목록을 조회합니다. 수용인원, 시설, 위치로 필터링 가능합니다',
   })
   @ApiResponse({ status: 200, description: '방 목록 조회 성공' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
@@ -93,10 +86,7 @@ export class RoomsController {
   @ApiResponse({ status: 200, description: '예약 가능 시간대 조회 성공' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '방을 찾을 수 없음' })
-  async getAvailability(
-    @Param('id') id: string,
-    @Query() query: AvailabilityQueryDto,
-  ) {
+  async getAvailability(@Param('id') id: string, @Query() query: AvailabilityQueryDto) {
     return await this.roomsService.getAvailability(id, query.date);
   }
 

@@ -121,9 +121,7 @@ describe('RoomsService', () => {
 
       mockRepository.findOne.mockResolvedValue(mockRoom);
 
-      await expect(service.create(createDto)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(service.create(createDto)).rejects.toThrow(ConflictException);
     });
   });
 
@@ -142,9 +140,7 @@ describe('RoomsService', () => {
     it('should throw NotFoundException if room not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -176,10 +172,9 @@ describe('RoomsService', () => {
       const result = await service.findAll({ minCapacity: 5 });
 
       expect(result).toEqual([mockRoom]);
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'room.capacity >= :minCapacity',
-        { minCapacity: 5 },
-      );
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith('room.capacity >= :minCapacity', {
+        minCapacity: 5,
+      });
     });
   });
 
@@ -200,20 +195,18 @@ describe('RoomsService', () => {
     it('should throw NotFoundException if room not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.update('invalid-id', { name: 'Updated' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update('invalid-id', { name: 'Updated' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ConflictException if updating to existing room number', async () => {
       const anotherRoom = { ...mockRoom, id: 'another-id' };
-      mockRepository.findOne
-        .mockResolvedValueOnce(mockRoom)
-        .mockResolvedValueOnce(anotherRoom);
+      mockRepository.findOne.mockResolvedValueOnce(mockRoom).mockResolvedValueOnce(anotherRoom);
 
-      await expect(
-        service.update(mockRoom.id, { roomNumber: 'A102' }),
-      ).rejects.toThrow(ConflictException);
+      await expect(service.update(mockRoom.id, { roomNumber: 'A102' })).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -233,9 +226,7 @@ describe('RoomsService', () => {
     it('should throw NotFoundException if room not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.remove('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -266,9 +257,9 @@ describe('RoomsService', () => {
     it('should throw NotFoundException if room not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.getAvailability('invalid-id', '2025-10-13'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.getAvailability('invalid-id', '2025-10-13')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

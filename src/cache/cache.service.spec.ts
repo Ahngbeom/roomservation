@@ -63,11 +63,7 @@ describe('CacheService', () => {
 
       await service.set(key, value);
 
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
-        key,
-        value,
-        CACHE_TTL.MEDIUM,
-      );
+      expect(mockCacheManager.set).toHaveBeenCalledWith(key, value, CACHE_TTL.MEDIUM);
     });
 
     it('should store value with custom TTL', async () => {
@@ -106,12 +102,8 @@ describe('CacheService', () => {
 
       await service.invalidateRoom(roomId);
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
-        CACHE_KEYS.ROOM(roomId),
-      );
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
-        CACHE_KEYS.ROOM_AVAILABILITY(roomId),
-      );
+      expect(mockCacheManager.del).toHaveBeenCalledWith(CACHE_KEYS.ROOM(roomId));
+      expect(mockCacheManager.del).toHaveBeenCalledWith(CACHE_KEYS.ROOM_AVAILABILITY(roomId));
       expect(mockCacheManager.del).toHaveBeenCalledWith(CACHE_KEYS.ROOMS);
     });
   });
@@ -122,9 +114,7 @@ describe('CacheService', () => {
 
       await service.invalidateUser(userId);
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
-        CACHE_KEYS.USER(userId),
-      );
+      expect(mockCacheManager.del).toHaveBeenCalledWith(CACHE_KEYS.USER(userId));
     });
   });
 
@@ -134,9 +124,7 @@ describe('CacheService', () => {
 
       await service.invalidateUserReservations(userId);
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
-        CACHE_KEYS.RESERVATIONS_USER(userId),
-      );
+      expect(mockCacheManager.del).toHaveBeenCalledWith(CACHE_KEYS.RESERVATIONS_USER(userId));
     });
   });
 

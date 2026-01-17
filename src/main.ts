@@ -28,9 +28,7 @@ async function bootstrap() {
   // Swagger API Documentation
   const config = new DocumentBuilder()
     .setTitle('방 예약 서비스 API')
-    .setDescription(
-      '회의실, 세미나실 등 특정 공간에 대해서 예약 서비스를 제공해주는 API 서버',
-    )
+    .setDescription('회의실, 세미나실 등 특정 공간에 대해서 예약 서비스를 제공해주는 API 서버')
     .setVersion('1.0')
     .addTag('auth', '인증 관련 API')
     .addTag('rooms', '방 관리 API')
