@@ -35,6 +35,8 @@ import { CacheModule } from './cache/cache.module';
           configService.get<string>('NODE_ENV') || 'production',
         ),
         logging: configService.get<string>('NODE_ENV') === 'development',
+        // Neon, Supabase 등 클라우드 PostgreSQL은 SSL 필수
+        ssl: configService.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
     }),
     UsersModule,
