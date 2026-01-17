@@ -24,11 +24,13 @@ import { CacheService } from './cache.service';
         }
 
         try {
+          const useTls = configService.get<string>('REDIS_TLS') === 'true';
           return {
             store: await redisStore({
               socket: {
                 host: redisHost,
                 port: redisPort,
+                tls: useTls, // Upstash 등 클라우드 Redis는 TLS 필수
               },
               password: redisPassword || undefined,
               ttl: 300000, // 5 minutes in milliseconds

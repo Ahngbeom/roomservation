@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: roomservation-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DB_TYPE
+        value: postgres
+      - key: DB_HOST
+        sync: false  # Neon에서 제공받은 값 입력
+      - key: DB_PORT
+        value: 5432
+      - key: DB_USERNAME
+        sync: false  # Neon에서 제공받은 값 입력
+      - key: DB_PASSWORD
+        sync: false  # Neon에서 제공받은 값 입력
+      - key: DB_DATABASE
+        sync: false  # Neon에서 제공받은 값 입력
+      - key: DB_SSL
+        value: true
+      - key: REDIS_HOST
+        sync: false  # Upstash에서 제공받은 값 입력
+      - key: REDIS_PORT
+        value: 6379
+      - key: REDIS_PASSWORD
+        sync: false  # Upstash에서 제공받은 값 입력
+      - key: REDIS_TLS
+        value: true
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: CORS_ORIGIN
+        value: "*"
+    healthCheckPath: /
