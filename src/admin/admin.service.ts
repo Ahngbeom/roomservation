@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { ReservationsService } from '../reservations/reservations.service';
 import { RoomsService } from '../rooms/rooms.service';
-import {
-  AdminUserQueryDto,
-  AdminReservationQueryDto,
-} from './dto/admin-query.dto';
+import { AdminUserQueryDto, AdminReservationQueryDto } from './dto/admin-query.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { User } from '../users/user.entity';
 import { ReservationStatus } from '../reservations/reservation.entity';
@@ -58,15 +55,7 @@ export class AdminService {
   }
 
   async getAllReservations(query: AdminReservationQueryDto) {
-    const {
-      page = 1,
-      limit = 10,
-      status,
-      roomId,
-      userId,
-      startDate,
-      endDate,
-    } = query;
+    const { page = 1, limit = 10, status, roomId, userId, startDate, endDate } = query;
     const skip = (page - 1) * limit;
 
     const where: FindOptionsWhere<Reservation> = {};
@@ -91,15 +80,13 @@ export class AdminService {
       where.startTime = Between(new Date('2000-01-01'), new Date(endDate));
     }
 
-    const [reservations, total] = await this.reservationRepository.findAndCount(
-      {
-        where,
-        relations: ['user', 'room'],
-        skip,
-        take: limit,
-        order: { startTime: 'DESC' },
-      },
-    );
+    const [reservations, total] = await this.reservationRepository.findAndCount({
+      where,
+      relations: ['user', 'room'],
+      skip,
+      take: limit,
+      order: { startTime: 'DESC' },
+    });
 
     return {
       data: reservations.map((reservation) => {
@@ -233,11 +220,7 @@ export class AdminService {
     };
 
     // 캐시 저장 (5분)
-    await this.cacheService.set(
-      CACHE_KEYS.STATISTICS,
-      result,
-      CACHE_TTL.MEDIUM,
-    );
+    await this.cacheService.set(CACHE_KEYS.STATISTICS, result, CACHE_TTL.MEDIUM);
 
     return result;
   }

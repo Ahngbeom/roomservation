@@ -34,23 +34,19 @@ describe('Rooms (e2e)', () => {
 
     // Create admin user
     const adminEmail = `admin-${Date.now()}@example.com`;
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({
-        email: adminEmail,
-        password: 'AdminPass123!',
-        name: 'Admin User',
-        phone: '010-1111-1111',
-        department: 'Management',
-      });
+    await request(app.getHttpServer()).post('/api/auth/register').send({
+      email: adminEmail,
+      password: 'AdminPass123!',
+      name: 'Admin User',
+      phone: '010-1111-1111',
+      department: 'Management',
+    });
 
     // Login as admin and get admin token
-    const adminLoginResponse = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({
-        email: adminEmail,
-        password: 'AdminPass123!',
-      });
+    const adminLoginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+      email: adminEmail,
+      password: 'AdminPass123!',
+    });
     adminToken = adminLoginResponse.body.accessToken;
 
     // Note: In a real scenario, you would promote this user to ADMIN role via database or admin API
@@ -58,23 +54,19 @@ describe('Rooms (e2e)', () => {
 
     // Create regular user
     const userEmail = `user-${Date.now()}@example.com`;
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({
-        email: userEmail,
-        password: 'UserPass123!',
-        name: 'Regular User',
-        phone: '010-2222-2222',
-        department: 'Engineering',
-      });
+    await request(app.getHttpServer()).post('/api/auth/register').send({
+      email: userEmail,
+      password: 'UserPass123!',
+      name: 'Regular User',
+      phone: '010-2222-2222',
+      department: 'Engineering',
+    });
 
     // Login as regular user
-    const userLoginResponse = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({
-        email: userEmail,
-        password: 'UserPass123!',
-      });
+    const userLoginResponse = await request(app.getHttpServer()).post('/api/auth/login').send({
+      email: userEmail,
+      password: 'UserPass123!',
+    });
     userToken = userLoginResponse.body.accessToken;
   });
 
@@ -260,9 +252,7 @@ describe('Rooms (e2e)', () => {
 
       if (roomsResponse.body.length > 0) {
         const testRoomId = roomsResponse.body[0].id;
-        return request(app.getHttpServer())
-          .get(`/api/rooms/${testRoomId}`)
-          .expect(401);
+        return request(app.getHttpServer()).get(`/api/rooms/${testRoomId}`).expect(401);
       }
     });
   });

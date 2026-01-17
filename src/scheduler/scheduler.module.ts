@@ -6,10 +6,7 @@ import { Reservation } from '../reservations/reservation.entity';
 import { RoomAccess } from '../access/room-access.entity';
 
 @Module({
-  imports: [
-    NestScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Reservation, RoomAccess]),
-  ],
+  imports: [NestScheduleModule.forRoot(), TypeOrmModule.forFeature([Reservation, RoomAccess])],
   providers: [SchedulerService],
   exports: [SchedulerService],
 })

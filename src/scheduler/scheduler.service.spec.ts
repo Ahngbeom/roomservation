@@ -1,10 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SchedulerService } from './scheduler.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  Reservation,
-  ReservationStatus,
-} from '../reservations/reservation.entity';
+import { Reservation, ReservationStatus } from '../reservations/reservation.entity';
 import { RoomAccess } from '../access/room-access.entity';
 import { Repository } from 'typeorm';
 
@@ -62,12 +59,8 @@ describe('SchedulerService', () => {
     }).compile();
 
     service = module.get<SchedulerService>(SchedulerService);
-    _reservationRepository = module.get<Repository<Reservation>>(
-      getRepositoryToken(Reservation),
-    );
-    _roomAccessRepository = module.get<Repository<RoomAccess>>(
-      getRepositoryToken(RoomAccess),
-    );
+    _reservationRepository = module.get<Repository<Reservation>>(getRepositoryToken(Reservation));
+    _roomAccessRepository = module.get<Repository<RoomAccess>>(getRepositoryToken(RoomAccess));
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -147,9 +140,7 @@ describe('SchedulerService', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      mockReservationRepository.find.mockRejectedValue(
-        new Error('Database error'),
-      );
+      mockReservationRepository.find.mockRejectedValue(new Error('Database error'));
 
       await expect(service.handleNoShows()).resolves.not.toThrow();
     });
@@ -192,9 +183,7 @@ describe('SchedulerService', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      mockReservationRepository.find.mockRejectedValue(
-        new Error('Database error'),
-      );
+      mockReservationRepository.find.mockRejectedValue(new Error('Database error'));
 
       await expect(service.handleAutoCompletion()).resolves.not.toThrow();
     });

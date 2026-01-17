@@ -94,9 +94,7 @@ describe('ReservationsService', () => {
     }).compile();
 
     service = module.get<ReservationsService>(ReservationsService);
-    _repository = module.get<Repository<Reservation>>(
-      getRepositoryToken(Reservation),
-    );
+    _repository = module.get<Repository<Reservation>>(getRepositoryToken(Reservation));
     _roomsService = module.get<RoomsService>(RoomsService);
   });
 
@@ -146,9 +144,7 @@ describe('ReservationsService', () => {
 
       mockRoomsService.findOne.mockResolvedValue(mockRoom);
 
-      await expect(service.create(createDto, 'user-id')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.create(createDto, 'user-id')).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException if duration is less than 30 minutes', async () => {
@@ -166,9 +162,7 @@ describe('ReservationsService', () => {
 
       mockRoomsService.findOne.mockResolvedValue(mockRoom);
 
-      await expect(service.create(createDto, 'user-id')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.create(createDto, 'user-id')).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException if attendees exceed room capacity', async () => {
@@ -183,9 +177,7 @@ describe('ReservationsService', () => {
 
       mockRoomsService.findOne.mockResolvedValue(mockRoom);
 
-      await expect(service.create(createDto, 'user-id')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.create(createDto, 'user-id')).rejects.toThrow(BadRequestException);
     });
 
     it('should throw ConflictException if time slot is already booked', async () => {
@@ -201,9 +193,7 @@ describe('ReservationsService', () => {
       mockRoomsService.findOne.mockResolvedValue(mockRoom);
       mockQueryBuilder.getOne.mockResolvedValue(mockReservation); // Conflict exists
 
-      await expect(service.create(createDto, 'user-id')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(service.create(createDto, 'user-id')).rejects.toThrow(ConflictException);
     });
   });
 
@@ -234,17 +224,15 @@ describe('ReservationsService', () => {
     it('should throw NotFoundException if reservation does not exist', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('invalid-id', 'user-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('invalid-id', 'user-id')).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException if user does not own reservation', async () => {
       mockRepository.findOne.mockResolvedValue(mockReservation);
 
-      await expect(
-        service.findOne('reservation-id', 'another-user-id'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.findOne('reservation-id', 'another-user-id')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -281,11 +269,7 @@ describe('ReservationsService', () => {
       mockRepository.findOne.mockResolvedValue(cancelledReservation);
 
       await expect(
-        service.cancel(
-          'reservation-id',
-          { cancellationReason: 'Test' },
-          'user-id',
-        ),
+        service.cancel('reservation-id', { cancellationReason: 'Test' }, 'user-id'),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -311,9 +295,7 @@ describe('ReservationsService', () => {
 
       mockRepository.findOne.mockResolvedValue(confirmedReservation);
 
-      await expect(service.confirm('reservation-id')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.confirm('reservation-id')).rejects.toThrow(BadRequestException);
     });
   });
 });

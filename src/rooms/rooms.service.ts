@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room } from './room.entity';
@@ -26,9 +22,7 @@ export class RoomsService {
     });
 
     if (existingRoom) {
-      throw new ConflictException(
-        `Room with number ${createRoomDto.roomNumber} already exists`,
-      );
+      throw new ConflictException(`Room with number ${createRoomDto.roomNumber} already exists`);
     }
 
     const room = this.roomRepository.create(createRoomDto);
@@ -111,18 +105,13 @@ export class RoomsService {
     const room = await this.findOne(id);
 
     // 방 번호를 변경하는 경우 중복 체크
-    if (
-      updateRoomDto.roomNumber &&
-      updateRoomDto.roomNumber !== room.roomNumber
-    ) {
+    if (updateRoomDto.roomNumber && updateRoomDto.roomNumber !== room.roomNumber) {
       const existingRoom = await this.roomRepository.findOne({
         where: { roomNumber: updateRoomDto.roomNumber },
       });
 
       if (existingRoom) {
-        throw new ConflictException(
-          `Room with number ${updateRoomDto.roomNumber} already exists`,
-        );
+        throw new ConflictException(`Room with number ${updateRoomDto.roomNumber} already exists`);
       }
     }
 
@@ -177,8 +166,7 @@ export class RoomsService {
       date,
       operatingHours: room.operatingHours,
       availableSlots: [], // 예약 모듈 구현 후 계산
-      message:
-        'Availability calculation will be completed after Reservation module implementation',
+      message: 'Availability calculation will be completed after Reservation module implementation',
     };
 
     // 짧은 TTL로 캐시 (1분) - 예약 상태가 자주 변경될 수 있음

@@ -10,13 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -130,11 +124,7 @@ export class ReservationsController {
     @Body() updateReservationDto: UpdateReservationDto,
     @CurrentUser('id') userId: string,
   ) {
-    return await this.reservationsService.update(
-      id,
-      updateReservationDto,
-      userId,
-    );
+    return await this.reservationsService.update(id, updateReservationDto, userId);
   }
 
   @Delete(':id')

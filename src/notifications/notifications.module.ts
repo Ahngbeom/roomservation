@@ -11,11 +11,9 @@ import { WsJwtGuard } from './guards/ws-jwt.guard';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService): JwtModuleOptions => ({
-        secret:
-          configService.get<string>('JWT_ACCESS_SECRET') || 'default-secret',
+        secret: configService.get<string>('JWT_ACCESS_SECRET') || 'default-secret',
         signOptions: {
-          expiresIn: (configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
-            '15m') as any,
+          expiresIn: (configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m') as any,
         },
       }),
     }),

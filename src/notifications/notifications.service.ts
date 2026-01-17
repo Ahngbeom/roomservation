@@ -33,17 +33,10 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToUser(
-      userId,
-      NotificationEvent.RESERVATION_CREATED,
-      payload,
-    );
+    this.notificationsGateway.sendToUser(userId, NotificationEvent.RESERVATION_CREATED, payload);
 
     // 관리자에게도 알림
-    this.notificationsGateway.sendToAdmins(
-      NotificationEvent.RESERVATION_CREATED,
-      payload,
-    );
+    this.notificationsGateway.sendToAdmins(NotificationEvent.RESERVATION_CREATED, payload);
   }
 
   /**
@@ -56,17 +49,10 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToUser(
-      userId,
-      NotificationEvent.RESERVATION_UPDATED,
-      payload,
-    );
+    this.notificationsGateway.sendToUser(userId, NotificationEvent.RESERVATION_UPDATED, payload);
 
     // 관리자에게도 알림
-    this.notificationsGateway.sendToAdmins(
-      NotificationEvent.RESERVATION_UPDATED,
-      payload,
-    );
+    this.notificationsGateway.sendToAdmins(NotificationEvent.RESERVATION_UPDATED, payload);
   }
 
   /**
@@ -79,28 +65,17 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToUser(
-      userId,
-      NotificationEvent.RESERVATION_CANCELLED,
-      payload,
-    );
+    this.notificationsGateway.sendToUser(userId, NotificationEvent.RESERVATION_CANCELLED, payload);
 
     // 관리자에게도 알림
-    this.notificationsGateway.sendToAdmins(
-      NotificationEvent.RESERVATION_CANCELLED,
-      payload,
-    );
+    this.notificationsGateway.sendToAdmins(NotificationEvent.RESERVATION_CANCELLED, payload);
 
     // 해당 방을 구독 중인 사용자들에게도 알림 (가용성 변경)
-    this.notificationsGateway.sendToRoom(
-      reservation.roomId,
-      NotificationEvent.ROOM_AVAILABLE,
-      {
-        roomId: reservation.roomId,
-        availableFrom: reservation.startTime,
-        timestamp: new Date(),
-      },
-    );
+    this.notificationsGateway.sendToRoom(reservation.roomId, NotificationEvent.ROOM_AVAILABLE, {
+      roomId: reservation.roomId,
+      availableFrom: reservation.startTime,
+      timestamp: new Date(),
+    });
   }
 
   /**
@@ -113,22 +88,14 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToUser(
-      userId,
-      NotificationEvent.RESERVATION_COMPLETED,
-      payload,
-    );
+    this.notificationsGateway.sendToUser(userId, NotificationEvent.RESERVATION_COMPLETED, payload);
 
     // 해당 방을 구독 중인 사용자들에게도 알림 (가용성 변경)
-    this.notificationsGateway.sendToRoom(
-      reservation.roomId,
-      NotificationEvent.ROOM_AVAILABLE,
-      {
-        roomId: reservation.roomId,
-        availableFrom: new Date(),
-        timestamp: new Date(),
-      },
-    );
+    this.notificationsGateway.sendToRoom(reservation.roomId, NotificationEvent.ROOM_AVAILABLE, {
+      roomId: reservation.roomId,
+      availableFrom: new Date(),
+      timestamp: new Date(),
+    });
   }
 
   /**
@@ -141,28 +108,17 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToUser(
-      userId,
-      NotificationEvent.RESERVATION_NO_SHOW,
-      payload,
-    );
+    this.notificationsGateway.sendToUser(userId, NotificationEvent.RESERVATION_NO_SHOW, payload);
 
     // 관리자에게도 알림
-    this.notificationsGateway.sendToAdmins(
-      NotificationEvent.RESERVATION_NO_SHOW,
-      payload,
-    );
+    this.notificationsGateway.sendToAdmins(NotificationEvent.RESERVATION_NO_SHOW, payload);
 
     // 해당 방을 구독 중인 사용자들에게도 알림 (가용성 변경)
-    this.notificationsGateway.sendToRoom(
-      reservation.roomId,
-      NotificationEvent.ROOM_AVAILABLE,
-      {
-        roomId: reservation.roomId,
-        availableFrom: new Date(),
-        timestamp: new Date(),
-      },
-    );
+    this.notificationsGateway.sendToRoom(reservation.roomId, NotificationEvent.ROOM_AVAILABLE, {
+      roomId: reservation.roomId,
+      availableFrom: new Date(),
+      timestamp: new Date(),
+    });
   }
 
   /**
@@ -175,17 +131,10 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToRoom(
-      roomId,
-      NotificationEvent.ROOM_OCCUPIED,
-      payload,
-    );
+    this.notificationsGateway.sendToRoom(roomId, NotificationEvent.ROOM_OCCUPIED, payload);
 
     // 관리자에게도 알림
-    this.notificationsGateway.sendToAdmins(
-      NotificationEvent.ROOM_OCCUPIED,
-      payload,
-    );
+    this.notificationsGateway.sendToAdmins(NotificationEvent.ROOM_OCCUPIED, payload);
   }
 
   /**
@@ -197,11 +146,7 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToRoom(
-      roomId,
-      NotificationEvent.ROOM_AVAILABLE,
-      payload,
-    );
+    this.notificationsGateway.sendToRoom(roomId, NotificationEvent.ROOM_AVAILABLE, payload);
   }
 
   /**
@@ -214,11 +159,7 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToUser(
-      userId,
-      NotificationEvent.ACCESS_GRANTED,
-      payload,
-    );
+    this.notificationsGateway.sendToUser(userId, NotificationEvent.ACCESS_GRANTED, payload);
   }
 
   /**
@@ -231,10 +172,6 @@ export class NotificationsService {
       timestamp: new Date(),
     };
 
-    this.notificationsGateway.sendToUser(
-      userId,
-      NotificationEvent.ACCESS_DENIED,
-      payload,
-    );
+    this.notificationsGateway.sendToUser(userId, NotificationEvent.ACCESS_DENIED, payload);
   }
 }

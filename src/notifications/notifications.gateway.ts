@@ -18,9 +18,7 @@ import { WsJwtGuard } from './guards/ws-jwt.guard';
   },
   namespace: '/notifications',
 })
-export class NotificationsGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -48,10 +46,7 @@ export class NotificationsGateway
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('subscribe')
-  handleSubscribe(
-    @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
+  handleSubscribe(@MessageBody() data: { userId: string }, @ConnectedSocket() client: Socket) {
     const { userId } = data;
 
     if (!this.userConnections.has(userId)) {
@@ -68,10 +63,7 @@ export class NotificationsGateway
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('unsubscribe')
-  handleUnsubscribe(
-    @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
+  handleUnsubscribe(@MessageBody() data: { userId: string }, @ConnectedSocket() client: Socket) {
     const { userId } = data;
 
     if (this.userConnections.has(userId)) {

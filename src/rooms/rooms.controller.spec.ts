@@ -126,10 +126,7 @@ describe('RoomsController', () => {
       });
 
       expect(result).toEqual(availability);
-      expect(service.getAvailability).toHaveBeenCalledWith(
-        mockRoom.id,
-        '2025-10-13',
-      );
+      expect(service.getAvailability).toHaveBeenCalledWith(mockRoom.id, '2025-10-13');
     });
   });
 

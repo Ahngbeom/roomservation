@@ -74,9 +74,7 @@ describe('AccessService', () => {
     }).compile();
 
     service = module.get<AccessService>(AccessService);
-    _repository = module.get<Repository<RoomAccess>>(
-      getRepositoryToken(RoomAccess),
-    );
+    _repository = module.get<Repository<RoomAccess>>(getRepositoryToken(RoomAccess));
     _reservationsService = module.get<ReservationsService>(ReservationsService);
   });
 
@@ -111,10 +109,7 @@ describe('AccessService', () => {
       );
 
       expect(result).toBeDefined();
-      expect(mockReservationsService.findOne).toHaveBeenCalledWith(
-        'reservation-id',
-        'user-id',
-      );
+      expect(mockReservationsService.findOne).toHaveBeenCalledWith('reservation-id', 'user-id');
       expect(mockRepository.save).toHaveBeenCalled();
     });
 

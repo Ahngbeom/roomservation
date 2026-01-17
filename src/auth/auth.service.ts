@@ -59,9 +59,7 @@ export class AuthService {
   async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
     const user = await this.usersService.findById(userId);
 
-    const isPasswordValid = await user.comparePassword(
-      changePasswordDto.currentPassword,
-    );
+    const isPasswordValid = await user.comparePassword(changePasswordDto.currentPassword);
     if (!isPasswordValid) {
       throw new BadRequestException('현재 비밀번호가 올바르지 않습니다');
     }
@@ -80,13 +78,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-        expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
-          '15m') as any,
+        expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m') as any,
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ||
-          '7d') as any,
+        expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d') as any,
       }),
     ]);
 

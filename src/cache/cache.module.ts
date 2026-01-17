@@ -11,8 +11,7 @@ import { CacheService } from './cache.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const redisHost =
-          configService.get<string>('REDIS_HOST') || 'localhost';
+        const redisHost = configService.get<string>('REDIS_HOST') || 'localhost';
         const redisPort = configService.get<number>('REDIS_PORT') || 6379;
         const redisPassword = configService.get<string>('REDIS_PASSWORD');
 
@@ -36,10 +35,7 @@ import { CacheService } from './cache.service';
             }),
           };
         } catch (error) {
-          console.warn(
-            'Redis connection failed, falling back to memory cache:',
-            error,
-          );
+          console.warn('Redis connection failed, falling back to memory cache:', error);
           return {
             ttl: 300000,
             max: 100,

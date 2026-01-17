@@ -5,10 +5,7 @@ import { ReservationsService } from '../reservations/reservations.service';
 import { RoomsService } from '../rooms/rooms.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User, UserRole } from '../users/user.entity';
-import {
-  Reservation,
-  ReservationStatus,
-} from '../reservations/reservation.entity';
+import { Reservation, ReservationStatus } from '../reservations/reservation.entity';
 import { Repository } from 'typeorm';
 import { CacheService } from '../cache/cache.service';
 
@@ -137,9 +134,7 @@ describe('AdminService', () => {
     _reservationsService = module.get<ReservationsService>(ReservationsService);
     _roomsService = module.get<RoomsService>(RoomsService);
     _userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    _reservationRepository = module.get<Repository<Reservation>>(
-      getRepositoryToken(Reservation),
-    );
+    _reservationRepository = module.get<Repository<Reservation>>(getRepositoryToken(Reservation));
     _cacheService = module.get<CacheService>(CacheService);
   });
 
@@ -149,10 +144,7 @@ describe('AdminService', () => {
 
   describe('getAllUsers', () => {
     it('should return paginated users without passwords', async () => {
-      const users = [
-        mockUser,
-        { ...mockUser, id: 2, email: 'user2@example.com' },
-      ];
+      const users = [mockUser, { ...mockUser, id: 2, email: 'user2@example.com' }];
       mockUserRepository.findAndCount.mockResolvedValue([users, 2]);
 
       const result = await service.getAllUsers({ page: 1, limit: 10 });
@@ -190,10 +182,7 @@ describe('AdminService', () => {
   describe('getAllReservations', () => {
     it('should return paginated reservations without user passwords', async () => {
       const reservations = [mockReservation];
-      mockReservationRepository.findAndCount.mockResolvedValue([
-        reservations,
-        1,
-      ]);
+      mockReservationRepository.findAndCount.mockResolvedValue([reservations, 1]);
 
       const result = await service.getAllReservations({ page: 1, limit: 10 });
 
@@ -209,10 +198,7 @@ describe('AdminService', () => {
 
     it('should filter reservations by status', async () => {
       const confirmedReservations = [mockReservation];
-      mockReservationRepository.findAndCount.mockResolvedValue([
-        confirmedReservations,
-        1,
-      ]);
+      mockReservationRepository.findAndCount.mockResolvedValue([confirmedReservations, 1]);
 
       const result = await service.getAllReservations({
         page: 1,
@@ -231,10 +217,7 @@ describe('AdminService', () => {
     });
 
     it('should filter reservations by roomId', async () => {
-      mockReservationRepository.findAndCount.mockResolvedValue([
-        [mockReservation],
-        1,
-      ]);
+      mockReservationRepository.findAndCount.mockResolvedValue([[mockReservation], 1]);
 
       await service.getAllReservations({
         page: 1,
@@ -252,10 +235,7 @@ describe('AdminService', () => {
     });
 
     it('should filter reservations by date range', async () => {
-      mockReservationRepository.findAndCount.mockResolvedValue([
-        [mockReservation],
-        1,
-      ]);
+      mockReservationRepository.findAndCount.mockResolvedValue([[mockReservation], 1]);
 
       const result = await service.getAllReservations({
         page: 1,
@@ -309,9 +289,7 @@ describe('AdminService', () => {
         setParameters: jest.fn().mockReturnThis(),
         getRawMany: jest
           .fn()
-          .mockResolvedValue([
-            { status: ReservationStatus.CONFIRMED, count: '50' },
-          ]),
+          .mockResolvedValue([{ status: ReservationStatus.CONFIRMED, count: '50' }]),
         getRawOne: jest.fn().mockResolvedValue({
           totalReservations: '80',
           completedReservations: '50',

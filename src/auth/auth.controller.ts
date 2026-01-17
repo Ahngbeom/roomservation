@@ -10,12 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -58,10 +53,7 @@ export class AuthController {
     status: 401,
     description: '인증 실패 (잘못된 이메일 또는 비밀번호)',
   })
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
     const result = await this.authService.login(loginDto);
 
     // Refresh Token을 HttpOnly 쿠키로 설정
@@ -102,10 +94,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: '토큰 갱신 성공' })
   @ApiResponse({ status: 401, description: '유효하지 않은 Refresh Token' })
-  async refresh(
-    @CurrentUser() user: User,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async refresh(@CurrentUser() user: User, @Res({ passthrough: true }) response: Response) {
     const tokens = await this.authService.refresh(user);
 
     response.cookie('refreshToken', tokens.refreshToken, {
@@ -143,14 +132,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '프로필 수정 성공' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
-  async updateProfile(
-    @CurrentUser() user: User,
-    @Body() updateProfileDto: UpdateProfileDto,
-  ) {
-    const updatedUser = await this.authService.updateProfile(
-      user.id,
-      updateProfileDto,
-    );
+  async updateProfile(@CurrentUser() user: User, @Body() updateProfileDto: UpdateProfileDto) {
+    const updatedUser = await this.authService.updateProfile(user.id, updateProfileDto);
     return {
       message: '프로필이 수정되었습니다',
       user: updatedUser,
@@ -170,10 +153,7 @@ export class AuthController {
     description: '인증되지 않은 사용자 또는 현재 비밀번호 불일치',
   })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
-  async changePassword(
-    @CurrentUser() user: User,
-    @Body() changePasswordDto: ChangePasswordDto,
-  ) {
+  async changePassword(@CurrentUser() user: User, @Body() changePasswordDto: ChangePasswordDto) {
     await this.authService.changePassword(user.id, changePasswordDto);
     return {
       message: '비밀번호가 변경되었습니다',

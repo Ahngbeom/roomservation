@@ -7,10 +7,7 @@ import { UsersService } from '../../users/users.service';
 import { JwtPayload } from './jwt.strategy';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(
-  Strategy,
-  'jwt-refresh',
-) {
+export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
@@ -22,9 +19,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey:
-        configService.get<string>('JWT_REFRESH_SECRET') ||
-        'default_refresh_secret',
+      secretOrKey: configService.get<string>('JWT_REFRESH_SECRET') || 'default_refresh_secret',
     });
   }
 
