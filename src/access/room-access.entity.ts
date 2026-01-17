@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Room } from '../rooms/room.entity';
@@ -17,6 +18,10 @@ export enum AccessMethod {
 }
 
 @Entity('room_accesses')
+@Index('idx_room_accesses_token', ['accessToken'])
+@Index('idx_room_accesses_reservation_used', ['reservationId', 'isUsed'])
+@Index('idx_room_accesses_user_created', ['userId', 'createdAt'])
+@Index('idx_room_accesses_room_time', ['roomId', 'createdAt'])
 export class RoomAccess {
   @PrimaryGeneratedColumn('uuid')
   id: string;
